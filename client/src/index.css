@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html,body{
+    width: 100% !important;
+    height: 100% !important;
+}
+/* in global css */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+/* NORMAL */
+.upload-box {
+  border: 2px dashed #9ca3af;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* DRAGGING STATE */
+.upload-box.dragging {
+  border: none;
+}
+
+/* FULL ROTATING BORDER */
+.upload-box.dragging::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 2px;
+
+  background:
+    linear-gradient(90deg, black 50%, transparent 50%) top left,
+    linear-gradient(0deg, black 50%, transparent 50%) top right,
+    linear-gradient(90deg, black 50%, transparent 50%) bottom right,
+    linear-gradient(0deg, black 50%, transparent 50%) bottom left;
+
+  background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px;
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  animation: borderMove 1s linear infinite;
+}
+
+/* KEYFRAME */
+@keyframes borderMove {
+  0% {
+    background-position: 
+      0 0, 
+      100% 0, 
+      0 100%, 
+      0 0;
+  }
+  100% {
+    background-position: 
+      40px 0, 
+      100% 40px, 
+      -40px 100%, 
+      0 -40px;
+  }
+}
