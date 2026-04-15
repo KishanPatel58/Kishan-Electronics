@@ -6,15 +6,18 @@ import { FiPlusSquare, FiBox, FiLogOut } from "react-icons/fi";
 import { useAdmin } from "../context/AdminContext";
 import { logoutAdmin } from "../services/api";
 import toast from "react-hot-toast";
+import Navbar from "../components/Navbar";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AdminDashboard() {
+  const { dark } = useTheme();
   const [activeTab, setActiveTab] = useState(
     localStorage.getItem("adminTab") || "add"
   );
   const handleProfileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+    window.title = admin?.name || "Admin";
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -47,7 +50,6 @@ export default function AdminDashboard() {
     if (words.length === 1) {
       return words[0][0].toUpperCase();
     }
-
     return (
       words[0][0] + words[words.length - 1][0]
     ).toUpperCase();
@@ -68,103 +70,126 @@ export default function AdminDashboard() {
     localStorage.setItem("adminTab", activeTab);
   }, [activeTab]);
   return (
-    <div className="h-screen w-screen flex overflow-hidden">
+    <>
+      <Navbar />
 
-      {/* SIDEBAR */}
-      <aside className="w-72 bg-black text-white flex flex-col justify-between !p-6">
+      <div className="h-screen w-screen flex overflow-hidden">
 
-        <div>
-          <h1 className="text-2xl font-bold !mb-8">Admin Panel</h1>
+        {/* SIDEBAR */}
+        <aside
+          className={`w-72 flex flex-col justify-between !p-6 transition ${dark
+              ? "bg-black text-white border-r border-white/10"
+              : "bg-white text-black border-r border-gray-200"
+            }`}
+        >
+          <div>
+            <h1 className="text-2xl font-bold !mb-8">Admin Panel</h1>
 
-          {/* PROFILE */}
-          <div className="flex items-center gap-3 !mb-10">
-            <input
-              type="file"
-              id="profileUpload"
-              className="hidden"
-              onChange={handleProfileUpload}
-            />
-            <div
-              onClick={() => document.getElementById("profileUpload").click()}
-              className="w-12 h-12 rounded-full border border-white flex items-center justify-center cursor-pointer bg-gray-700 text-white font-bold text-lg overflow-hidden"
-            >
+            {/* PROFILE */}
+            <div className="flex items-center gap-3 !mb-10">
+              <input
+                type="file"
+                id="profileUpload"
+                className="hidden"
+                onChange={handleProfileUpload}
+              />
 
-              {admin?.image ? (
-                <img
-                  src={admin.image}
-                  className="w-full h-full object-cover"
-                  alt="admin"
-                />
-              ) : (
-                <span>
-                  {getInitials(admin?.name)}
-                </span>
-              )}
+              <div
+                onClick={() =>
+                  document.getElementById("profileUpload").click()
+                }
+                className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer overflow-hidden font-bold text-lg ${dark
+                    ? "bg-gray-800 border border-white/20"
+                    : "bg-gray-200 border border-gray-300"
+                  }`}
+              >
+                {admin?.image ? (
+                  <img
+                    src={admin.image}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{getInitials(admin?.name)}</span>
+                )}
+              </div>
 
+              <div>
+                <h2 className="font-semibold">
+                  {admin?.name || "Admin"}
+                </h2>
+                <p className="text-xs opacity-60">
+                  {admin?.email || "admin@gmail.com"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold">
-                {admin?.name || "Admin"}
-              </h2>
-              <p className="text-xs text-gray-400">
-                {admin?.email || "admin@gmail.com"}
-              </p>
+
+            {/* MENU */}
+            <div className="!space-y-2">
+
+              {/* ADD PRODUCT */}
+              <div
+                onClick={() => setActiveTab("add")}
+                className={`flex items-center gap-3 !p-3 rounded-xl cursor-pointer transition ${activeTab === "add"
+                    ? dark
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
+                    : dark
+                      ? "hover:bg-white/10"
+                      : "hover:bg-black/10"
+                  }`}
+              >
+                <FiPlusSquare />
+                Add Product
+              </div>
+
+              {/* MANAGE */}
+              <div
+                onClick={() => setActiveTab("manage")}
+                className={`flex items-center gap-3 !p-3 rounded-xl cursor-pointer transition ${activeTab === "manage"
+                    ? dark
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
+                    : dark
+                      ? "hover:bg-white/10"
+                      : "hover:bg-black/10"
+                  }`}
+              >
+                <FiBox />
+                Manage Products
+              </div>
+
             </div>
           </div>
 
-          {/* MENU */}
-          <div className="!space-y-2">
+          {/* FOOTER */}
+          <div className="!space-y-4">
 
             <div
-              onClick={() => setActiveTab("add")}
-              className={`flex items-center gap-3 !p-3 rounded-lg cursor-pointer transition ${activeTab === "add"
-                ? "bg-white text-black"
-                : "hover:bg-gray-800"
-                }`}
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-3 !p-3 rounded-xl cursor-pointer text-red-400 hover:bg-red-500/10 transition"
             >
-              <FiPlusSquare />
-              Add Product
+              <FiLogOut />
+              Logout
             </div>
 
-            <div
-              onClick={() => setActiveTab("manage")}
-              className={`flex items-center gap-3 !p-3 rounded-lg cursor-pointer transition ${activeTab === "manage"
-                ? "bg-white text-black"
-                : "hover:bg-gray-800"
-                }`}
-            >
-              <FiBox />
-              Manage Products
-            </div>
-
+            <p className="text-xs text-center opacity-50">
+              M@de By Kishan Patel
+            </p>
           </div>
-        </div>
+        </aside>
 
-        {/* FOOTER */}
-        <div className="!space-y-4">
-
-          {/* LOGOUT */}
-          <div
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-3 !p-3 rounded-lg cursor-pointer text-red-400 hover:bg-red-500/10 transition"
-          >
-            <FiLogOut />
-            Logout
+        {/* CONTENT */}
+        <main
+          className={`flex-1 flex items-center justify-center transition ${dark ? "bg-[#0f0f0f]" : "bg-gray-100"
+            }`}
+        >
+          <div className="w-full h-full max-w-6xl max-h-[95vh]">
+            {activeTab === "add" && <AddProduct />}
+            {activeTab === "manage" && <ManageProducts />}
           </div>
+        </main>
 
-          <p className="text-xs text-gray-500 text-center">M@de By Kishan Patel</p>
-        </div>
-
-      </aside>
-
-      {/* CONTENT */}
-      <main className="flex-1 bg-gray-100 flex items-center justify-center">
-        <div className="w-full h-full max-w-6xl max-h-[95vh]">
-          {activeTab === "add" && <AddProduct />}
-          {activeTab === "manage" && <ManageProducts />}
-        </div>
-      </main>
-
-    </div>
+      </div>
+    </>
   );
 }

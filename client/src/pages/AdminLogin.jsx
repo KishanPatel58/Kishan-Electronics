@@ -2,15 +2,19 @@ import { useState, useRef } from "react";
 import { loginAdmin, verifyOTP, getProfile } from "../services/api";
 import { useAdmin } from "../context/AdminContext";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+
 
 export default function AdminLogin() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [step, setStep] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-
+  const { dark } = useTheme();
   const inputsRef = useRef([]);
   const { setAdmin } = useAdmin();
 
@@ -89,11 +93,10 @@ export default function AdminLogin() {
       // 🔥 WAIT FOR REAL PROFILE
       const profile = await getProfile();
 
-      console.log("PROFILE:", profile.data);
-
       setAdmin(profile.data.admin); // ✅ ONLY THIS
 
       toast.success("Login successful ✅");
+      navigate("/dashboard");
 
     } catch (err) {
       console.log("ERROR:", err.response?.data);
@@ -109,9 +112,9 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="h-screen w-screen bg-gray-100 flex items-center justify-center">
+    <div className={`h-screen w-full ${dark ? "bg-black" : "bg-gray-100"} flex items-center justify-center`}>
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl !p-10">
+      <div className={`w-full border max-w-md ${dark ? "bg-black text-white border-[#ffffff76]" : "bg-white"} rounded-3xl shadow-xl !p-10`}>
 
         <h2 className="text-2xl font-semibold text-center !mb-8">
           Admin Login
@@ -126,7 +129,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="w-full border-b !p-2"
+              className={`w-full border-b !p-2 ${dark ? "bg-black text-white placeholder:text-gray-500" : "bg-white text-black placeholder:text-gray-500"}`}
             />
 
             <input
@@ -134,17 +137,19 @@ export default function AdminLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full border-b !p-2"
+              className={`w-full border-b !p-2 ${dark ? "bg-black text-white placeholder:text-gray-500" : "bg-white text-black placeholder:text-gray-500"}`}
             />
 
             <button
               disabled={loading}
-              className={`w-full text-white !py-3 rounded-xl transition ${loading
+              className={`w-full flex justify-center items-center font-semibold ${dark ? "text-black bg-white" : "text-white bg-black"} !py-3 rounded-xl transition ${loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-black hover:opacity-90"
                 }`}
             >
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {loading ? (
+                <div className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+              ) : "Send OTP"}
             </button>
           </form>
         )}
@@ -153,7 +158,7 @@ export default function AdminLogin() {
         {step === "otp" && (
           <form onSubmit={handleVerify} className="!space-y-8 text-center">
 
-            <p className="text-gray-500 text-sm">
+            <p className={`text-gray-500 text-sm ${dark ? "text-gray-400" : ""}`}>
               Enter the 6-digit OTP sent to your email
             </p>
 
@@ -177,12 +182,12 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={verifyLoading}
-              className={`w-full text-white !py-3 rounded-xl ${verifyLoading
+              className={`w-full flex items-center justify-center ${dark ? "bg-white text-black" : "text-white bg-black"} !py-3 rounded-xl ${verifyLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-black hover:opacity-90"
-                }`}
+                } cursor-pointer`}
             >
-              {verifyLoading ? "Verifying..." : "Verify OTP"}
+              {verifyLoading ? (<h1 className={`${dark?"text-white":"text-black"} animate-pulse`}>Verifying..</h1>) : "Verify OTP"}
             </button>
 
             <p

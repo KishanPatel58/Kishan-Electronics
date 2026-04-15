@@ -3,8 +3,10 @@ import axios from "axios";
 import { FiEdit, FiTrash } from "react-icons/fi";
 import { BsCloudArrowDown } from "react-icons/bs";
 import toast from "react-hot-toast";
+import { useTheme } from "../context/ThemeContext";
 
 export default function ManageProducts() {
+  const { dark } = useTheme();
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [category, setCategory] = useState("");
@@ -29,7 +31,7 @@ export default function ManageProducts() {
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/admin/categories"
+        "http://localhost:3000/api/admin/public/categories"
       );
 
       setCategories(res.data.categories);
@@ -47,7 +49,7 @@ export default function ManageProducts() {
       const query = new URLSearchParams(cleanFilters).toString();
 
       const res = await axios.get(
-        `http://localhost:3000/api/admin/products?${query}`,
+        `http://localhost:3000/api/admin/public/products?${query}`,
         { withCredentials: true }
       );
 
@@ -166,20 +168,25 @@ export default function ManageProducts() {
 
   return (
     <>
-      <div className="w-full h-full bg-white rounded-3xl shadow !p-6 overflow-hidden">
+      <div
+        className={`w-full h-full rounded-3xl shadow !p-6 overflow-hidden transition ${dark
+          ? "bg-[#111] text-white border border-white/10"
+          : "bg-white text-black border border-gray-200"
+          }`}
+      >
 
         <h2 className="text-2xl font-bold !mb-6">Manage Products</h2>
         <div className="flex gap-3 !mb-6 flex-wrap">
 
-
-          {/* CATEGORY */}
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="border !p-2 rounded"
+            className={`!p-2 rounded border ${dark
+              ? "bg-black border-gray-600 text-white"
+              : "bg-white border-gray-300"
+              }`}
           >
             <option value="">All Categories</option>
-
             {categories.map((c) => (
               <option key={c._id} value={c.name}>
                 {c.name}
@@ -187,41 +194,40 @@ export default function ManageProducts() {
             ))}
           </select>
 
-          {/* MIN PRICE */}
           <input
             type="number"
             placeholder="Min Price"
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
-            className="border !p-2 rounded"
+            className={`!p-2 rounded border ${dark
+              ? "bg-black border-gray-600 text-white"
+              : "bg-white border-gray-300"
+              }`}
           />
 
-          {/* APPLY FILTER */}
           <button
-            onClick={() => {
-              fetchData({
-                category,
-                minPrice
-              });
-            }
-            }
-            className="bg-black text-white !px-4 !py-2 rounded"
+            onClick={() => fetchData({ category, minPrice })}
+            className={`!px-4 !py-2 rounded ${dark
+              ? "bg-white text-black"
+              : "bg-black text-white"
+              }`}
           >
-            Apply Filter
+            Apply
           </button>
 
-          {/* RESET */}
           <button
             onClick={() => {
               setCategory("");
               setMinPrice("");
-              fetchData(); // 🔥 back to all
+              fetchData();
             }}
-            className="border !px-4 !py-2 rounded"
+            className={`!px-4 !py-2 rounded border ${dark
+              ? "border-white/20 hover:bg-white/10"
+              : "border-gray-300 hover:bg-gray-100"
+              }`}
           >
             Reset
           </button>
-
         </div>
         {
           products.length === 0 ? (
@@ -229,16 +235,21 @@ export default function ManageProducts() {
           ) : (
             <div className="!space-y-4">
               {products.map((p) => (
-                <div key={p._id} className="flex justify-between items-center border !p-4 rounded-xl">
-
+                <div
+                  key={p._id}
+                  className={`flex justify-between items-center !p-4 rounded-2xl transition ${dark
+                    ? "bg-white/5 border border-white/10 hover:bg-white/10"
+                    : "bg-gray-50 border border-gray-200 hover:bg-gray-100"
+                    }`}
+                >
                   <div className="flex items-center gap-4">
                     <img
                       src={p.image?.[0]}
-                      className="w-14 h-14 rounded object-cover"
+                      className="w-14 h-14 rounded-lg object-cover"
                     />
                     <div>
                       <h3 className="font-semibold">{p.name}</h3>
-                      <p className="text-sm text-gray-500">₹{p.price}</p>
+                      <p className="text-sm opacity-60">₹{p.price}</p>
                     </div>
                   </div>
 
@@ -246,7 +257,6 @@ export default function ManageProducts() {
                     <button
                       onClick={() => {
                         setEditingProduct(p);
-
                         setEditForm({
                           name: p.name,
                           price: p.price,
@@ -257,19 +267,21 @@ export default function ManageProducts() {
                         setEditImages(p.image || []);
                         setEditPreview(p.image || []);
                       }}
-                      className="!p-2 border rounded hover:bg-gray-100"
+                      className={`!p-2 rounded ${dark
+                        ? "border border-white/20 hover:bg-white/10"
+                        : "border border-gray-300 hover:bg-gray-200"
+                        }`}
                     >
                       <FiEdit />
                     </button>
+
                     <button
                       onClick={() => deleteProduct(p._id)}
-                      className="!p-2 border rounded hover:bg-gray-100"
+                      className="!p-2 rounded border border-red-400 text-red-400 hover:bg-red-500/10"
                     >
                       <FiTrash />
                     </button>
-
                   </div>
-
                 </div>
               ))}
             </div>
@@ -277,9 +289,14 @@ export default function ManageProducts() {
         }
       </div>
       {editingProduct && (
-        <div className="fixed !inset-0 bg-black/40 flex items-center justify-center !z-50">
+        <div className="fixed !inset-0 bg-black/50 flex items-center justify-center !z-50">
 
-          <div className="bg-white !p-6 rounded-xl w-[400px] !space-y-4">
+          <div
+            className={`!p-6 rounded-2xl w-[420px] !space-y-4 shadow-xl ${dark
+              ? "bg-[#111] text-white border border-white/10"
+              : "bg-white text-black"
+              }`}
+          >
 
             <h2 className="text-xl font-semibold">Edit Product</h2>
 
@@ -288,7 +305,10 @@ export default function ManageProducts() {
               value={editForm.name}
               onChange={handleEditChange}
               placeholder="Product Name"
-              className="w-full border !p-2 rounded"
+              className={`w-full !p-2 rounded border ${dark
+                ? "bg-black border-gray-600 text-white"
+                : "bg-white border-gray-300"
+                }`}
             />
             <input
               type="file"
@@ -315,7 +335,10 @@ export default function ManageProducts() {
               value={editForm.price}
               onChange={handleEditChange}
               placeholder="Price"
-              className="w-full border !p-2 rounded"
+              className={`w-full !p-2 rounded border ${dark
+                ? "bg-black border-gray-600 text-white"
+                : "bg-white border-gray-300"
+                }`}
             />
 
             <input
@@ -323,7 +346,10 @@ export default function ManageProducts() {
               value={editForm.oldPrice}
               onChange={handleEditChange}
               placeholder="Old Price"
-              className="w-full border !p-2 rounded"
+              className={`w-full !p-2 rounded border ${dark
+                ? "bg-black border-gray-600 text-white"
+                : "bg-white border-gray-300"
+                }`}
             />
 
             <input
@@ -331,7 +357,10 @@ export default function ManageProducts() {
               value={editForm.discount}
               onChange={handleEditChange}
               placeholder="Discount"
-              className="w-full border !p-2 rounded"
+              className={`w-full !p-2 rounded border ${dark
+                ? "bg-black border-gray-600 text-white"
+                : "bg-white border-gray-300"
+                }`}
             />
 
             <textarea
@@ -339,7 +368,10 @@ export default function ManageProducts() {
               value={editForm.description}
               onChange={handleEditChange}
               placeholder="Description"
-              className="w-full border !p-2 rounded"
+              className={`w-full !p-2 rounded border ${dark
+                ? "bg-black border-gray-600 text-white"
+                : "bg-white border-gray-300"
+                }`}
             />
             <div className="grid grid-cols-3 gap-4 !mt-2">
               {editPreview.map((img, index) => (
@@ -384,7 +416,10 @@ export default function ManageProducts() {
               onClick={() => document.getElementById("editUpload").click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              className="mt-4 border-2 border-dashed border-gray-300 rounded-xl h-24 flex flex-col items-center justify-center cursor-pointer hover:border-black transition"
+              className={`mt-4 border-2 border-dashed rounded-xl h-24 flex flex-col items-center justify-center cursor-pointer transition ${dark
+                  ? "border-white/20 hover:border-white"
+                  : "border-gray-300 hover:border-black"
+                }`}
             >
               <BsCloudArrowDown size={25} />
               <p className="text-xs text-gray-500">

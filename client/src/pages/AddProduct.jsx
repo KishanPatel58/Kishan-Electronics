@@ -5,8 +5,10 @@ import { FaPencilAlt } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AddProduct() {
+    const { dark } = useTheme();
     const [categories, setCategories] = useState([]);
     const [category, setCategory] = useState(""); // selected
     const [newCategory, setNewCategory] = useState(""); // input field
@@ -26,7 +28,7 @@ export default function AddProduct() {
         const fetchCategories = async () => {
             try {
                 const res = await axios.get(
-                    "http://localhost:3000/api/admin/categories"
+                    "http://localhost:3000/api/admin/public/categories"
                 );
 
                 setCategories(res.data.categories);
@@ -107,7 +109,7 @@ export default function AddProduct() {
         Object.keys(form).forEach((key) => {
             data.append(key, form[key]);
         });
-        data.append("category", category); 
+        data.append("category", category);
         images.forEach((img) => {
             data.append("image", img);
         });
@@ -129,14 +131,23 @@ export default function AddProduct() {
     return (
         <div className="w-full h-full flex items-center justify-center">
 
-            <div className="w-full max-w-5xl h-[85vh] grid grid-cols-2 bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div
+                className={`w-full max-w-5xl h-[85vh] grid grid-cols-2 rounded-2xl overflow-hidden shadow-xl transition ${dark
+                        ? "bg-[#111] border border-white/10"
+                        : "bg-white border border-gray-200"
+                    }`}
+            >
 
                 {/* LEFT - FORM */}
-                <form onSubmit={handleSubmit} className="!p-10 flex flex-col justify-between">
-
+                <form
+                    onSubmit={handleSubmit}
+                    className="!p-10 flex flex-col justify-between"
+                >
                     <div className="!space-y-6">
 
-                        <h2 className="text-2xl font-semibold">Add Product</h2>
+                        <h2 className={`text-2xl font-semibold ${dark ? "text-white" : "text-black"}`}>
+                            Add Product
+                        </h2>
 
                         {/* NAME */}
                         <div className="relative">
@@ -146,89 +157,88 @@ export default function AddProduct() {
                                 value={form.name}
                                 onChange={handleChange}
                                 placeholder=" "
-                                className="peer w-full border-b border-gray-400 bg-transparent !p-2 focus:outline-none"
+                                className={`peer w-full border-b bg-transparent !p-2 focus:outline-none ${dark ? "border-gray-600" : "border-gray-400"
+                                    }`}
                             />
-                            <label className="absolute left-2 top-2 text-gray-500 text-sm 
-                transition-all duration-200 ease-in-out
-                peer-placeholder-shown:top-2 peer-placeholder-shown:text-sm
-                peer-focus:-top-3 peer-focus:text-xs peer-focus:text-black
-                peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
-                bg-white !px-1">
+                            <label
+                                className={`absolute left-2 top-2 text-sm transition-all duration-200
+            peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-xs
+            peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
+            !px-1 ${dark
+                                        ? "text-gray-400 bg-[#111]"
+                                        : "text-gray-500 bg-white"
+                                    }`}
+                            >
                                 Product Name
                             </label>
                         </div>
-                        <div className="flex gap-2">
 
+                        {/* CATEGORY */}
+                        <div className="flex gap-2">
                             <input
                                 type="text"
                                 placeholder="Add new category"
                                 value={newCategory}
                                 onChange={(e) => setNewCategory(e.target.value)}
-                                className="flex-1 border !p-2 rounded"
+                                className={`flex-1 !p-2 rounded border ${dark
+                                        ? "bg-black border-gray-600 text-white"
+                                        : "bg-white border-gray-300"
+                                    }`}
                             />
 
                             <button
                                 type="button"
                                 onClick={handleAddCategory}
-                                className="bg-black text-white !px-4 !py-2 rounded"
+                                className={`!px-4 !py-2 rounded ${dark
+                                        ? "bg-white text-black"
+                                        : "bg-black text-white"
+                                    }`}
                             >
                                 Add
                             </button>
-
                         </div>
+
                         <select
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
-                            className="w-full border !p-2 rounded"
+                            className={`w-full !p-2 rounded border ${dark
+                                    ? "bg-black border-gray-600 text-white"
+                                    : "bg-white border-gray-300"
+                                }`}
                         >
                             <option value="">Select Category</option>
-
                             {categories.map((c) => (
                                 <option key={c._id} value={c.name}>
                                     {c.name}
                                 </option>
                             ))}
                         </select>
+
                         {/* PRICE */}
                         <div className="grid grid-cols-2 !gap-4">
 
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    name="oldPrice"
-                                    value={form.oldPrice}
-                                    onChange={handleChange}
-                                    placeholder=" "
-                                    className="peer w-full border-b border-gray-400 bg-transparent !p-2 focus:outline-none"
-                                />
-                                <label className="absolute left-2 top-2 text-gray-500 text-sm 
-                  transition-all duration-200
-                  peer-placeholder-shown:top-2 peer-placeholder-shown:text-sm
-                  peer-focus:-top-3 peer-focus:text-xs
-                  peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
-                  bg-white !px-1">
-                                    Old Price
-                                </label>
-                            </div>
-
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    name="price"
-                                    value={form.price}
-                                    onChange={handleChange}
-                                    placeholder=" "
-                                    className="peer w-full border-b border-gray-400 bg-transparent !p-2 focus:outline-none"
-                                />
-                                <label className="absolute left-2 top-2 text-gray-500 text-sm 
-                  transition-all duration-200
-                  peer-placeholder-shown:top-2 peer-placeholder-shown:text-sm
-                  peer-focus:-top-3 peer-focus:text-xs
-                  peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
-                  bg-white !px-1">
-                                    New Price
-                                </label>
-                            </div>
+                            {["oldPrice", "price"].map((field, i) => (
+                                <div key={i} className="relative">
+                                    <input
+                                        type="number"
+                                        name={field}
+                                        value={form[field]}
+                                        onChange={handleChange}
+                                        placeholder=" "
+                                        className={`peer w-full border-b bg-transparent !p-2 focus:outline-none ${dark ? "border-gray-600" : "border-gray-400"
+                                            }`}
+                                    />
+                                    <label
+                                        className={`absolute left-2 top-2 text-sm transition-all
+                peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-xs
+                peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
+                !px-1 ${dark ? "bg-[#111] text-gray-400" : "bg-white text-gray-500"
+                                            }`}
+                                    >
+                                        {field === "oldPrice" ? "Old Price" : "New Price"}
+                                    </label>
+                                </div>
+                            ))}
 
                         </div>
 
@@ -240,14 +250,16 @@ export default function AddProduct() {
                                 value={form.discount}
                                 onChange={handleChange}
                                 placeholder=" "
-                                className="peer w-full border-b border-gray-400 bg-transparent !p-2 focus:outline-none"
+                                className={`peer w-full border-b bg-transparent !p-2 focus:outline-none ${dark ? "border-gray-600" : "border-gray-400"
+                                    }`}
                             />
-                            <label className="absolute left-2 top-2 text-gray-500 text-sm 
-                transition-all duration-200
-                peer-placeholder-shown:top-2 peer-placeholder-shown:text-sm
-                peer-focus:-top-3 peer-focus:text-xs
-                peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
-                bg-white !px-1">
+                            <label
+                                className={`absolute left-2 top-2 text-sm transition-all
+            peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-xs
+            peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
+            !px-1 ${dark ? "bg-[#111] text-gray-400" : "bg-white text-gray-500"
+                                    }`}
+                            >
                                 Discount %
                             </label>
                         </div>
@@ -260,14 +272,16 @@ export default function AddProduct() {
                                 onChange={handleChange}
                                 placeholder=" "
                                 rows="3"
-                                className="peer w-full border-b border-gray-400 bg-transparent !p-2 focus:outline-none"
+                                className={`peer w-full border-b bg-transparent !p-2 focus:outline-none ${dark ? "border-gray-600" : "border-gray-400"
+                                    }`}
                             />
-                            <label className="absolute left-2 top-2 text-gray-500 text-sm 
-                transition-all duration-200
-                peer-placeholder-shown:top-2 peer-placeholder-shown:text-sm
-                peer-focus:-top-3 peer-focus:text-xs
-                peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
-                bg-white !px-1">
+                            <label
+                                className={`absolute left-2 top-2 text-sm transition-all
+            peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-xs
+            peer-not-placeholder-shown:-top-3 peer-not-placeholder-shown:text-xs
+            !px-1 ${dark ? "bg-[#111] text-gray-400" : "bg-white text-gray-500"
+                                    }`}
+                            >
                                 Description
                             </label>
                         </div>
@@ -276,7 +290,10 @@ export default function AddProduct() {
 
                     <button
                         type="submit"
-                        className="w-full bg-black text-white !py-3 !mt-6 rounded-lg hover:opacity-90"
+                        className={`w-full !py-3 !mt-6 rounded-lg transition ${dark
+                                ? "bg-white text-black hover:scale-105"
+                                : "bg-black text-white hover:scale-105"
+                            }`}
                     >
                         Add Product
                     </button>
@@ -294,21 +311,26 @@ export default function AddProduct() {
                         setIsDragging(false);
                         handleImages(e.dataTransfer.files);
                     }}
-                    className={`w-full h-full flex items-center justify-center bg-gray-50 border-l !p-8`}
+                    className={`flex items-center justify-center border-l !p-8 transition ${dark
+                            ? "bg-black border-white/10"
+                            : "bg-gray-50 border-gray-200"
+                        }`}
                 >
                     <div
-                        className={`w-full h-full flex flex-col items-center justify-center text-center upload-box transition-all duration-300
-      ${isDragging ? "dragging scale-105 bg-gray-100" : ""}
-    `}
+                        className={`w-full border border-dashed ${dark? "text-white border-white":"text-black border-black"} h-full flex flex-col items-center justify-center text-center transition ${isDragging ? "scale-105" : ""
+                            }`}
                     >
+                        <FiUploadCloud
+                            size={42}
+                            className={`!mb-4 ${dark ? "text-gray-400" : "text-gray-600"
+                                }`}
+                        />
 
-                        <FiUploadCloud size={42} className="!mb-4 text-gray-600" />
-
-                        <p className="text-gray-600 !mb-2 font-medium">
+                        <p className="!mb-2 font-medium">
                             Drag & drop image here
                         </p>
 
-                        <p className="text-sm text-gray-400 !mb-4">
+                        <p className="text-sm opacity-60 !mb-4">
                             or click below
                         </p>
 
@@ -319,19 +341,18 @@ export default function AddProduct() {
                             id="upload"
                             onChange={(e) => handleImages(e.target.files)}
                         />
-                        <input
-                            type="file"
-                            className="hidden"
-                            id="editUpload"
-                            onChange={(e) => handleEditImage(e.target.files[0])}
-                        />
+
                         <label
                             htmlFor="upload"
-                            className="bg-black text-white !px-4 !py-2 rounded cursor-pointer"
+                            className={`!px-4 !py-2 rounded cursor-pointer ${dark
+                                    ? "bg-white text-black"
+                                    : "bg-black text-white"
+                                }`}
                         >
                             Browse File
                         </label>
 
+                        {/* PREVIEW */}
                         {preview.length > 0 && (
                             <div className="w-full grid grid-cols-3 gap-3 !mt-6 !px-4">
                                 {preview.map((img, index) => (
@@ -339,27 +360,24 @@ export default function AddProduct() {
 
                                         <img
                                             src={img}
-                                            alt="preview"
                                             className="h-24 w-full object-cover rounded-lg border"
                                         />
 
-                                        {/* EDIT ICON */}
                                         <button
                                             type="button"
                                             onClick={() => {
                                                 setEditIndex(index);
                                                 document.getElementById("editUpload").click();
                                             }}
-                                            className="absolute top-1 right-8 bg-black text-white !p-1 rounded opacity-0 group-hover:opacity-100 transition"
+                                            className="absolute top-1 right-8 bg-black text-white !p-1 rounded opacity-0 group-hover:opacity-100"
                                         >
                                             <FaPencilAlt size={12} />
                                         </button>
 
-                                        {/* DELETE ICON */}
                                         <button
                                             type="button"
                                             onClick={() => handleDeleteImage(index)}
-                                            className="absolute top-1 right-1 bg-red-600 text-white !p-1 rounded opacity-0 group-hover:opacity-100 transition"
+                                            className="absolute top-1 right-1 bg-red-600 text-white !p-1 rounded opacity-0 group-hover:opacity-100"
                                         >
                                             <FaTrash size={12} />
                                         </button>
@@ -368,6 +386,7 @@ export default function AddProduct() {
                                 ))}
                             </div>
                         )}
+
                     </div>
                 </div>
 

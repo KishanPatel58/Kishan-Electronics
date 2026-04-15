@@ -154,7 +154,7 @@ const getAdminDetails = async (req, res) => {
 const logoutAdmin = async (req, res) => {
   try {
     const adminId = req.admin.adminId; // FIXED
-    const token = req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token
 
     await BlacklistToken.create({
       token,
@@ -246,7 +246,8 @@ const deleteProduct = async (req, res) => {
       await Promise.all(
         product.imageFileIds.map((fileId) =>
           imagekit.deleteFile(fileId).catch((err) => {
-            console.log("Image delete error:", err.message);
+            return res.status(500).json({message: err.message
+            })
           }),
         ),
       );
@@ -269,7 +270,7 @@ const getAllProducts = async (req, res) => {
 
     // 🔥 CATEGORY FILTER
     if (category) {
-      filter.category = category;
+      filter.category = new RegExp(`^${category}$`, "i");
     }
 
     // 🔥 PRICE FILTER ONLY IF EXISTS
@@ -284,8 +285,6 @@ const getAllProducts = async (req, res) => {
         filter.price.$lte = Number(maxPrice);
       }
     }
-
-    console.log("FILTER:", filter); // 🔥 DEBUG
 
     const products = await productModel.find(filter);
 
@@ -363,7 +362,7 @@ const uploadProfileImage = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const imageUrl = req.file.url; 
 
     const admin = await adminModel.findByIdAndUpdate(
       adminId,
